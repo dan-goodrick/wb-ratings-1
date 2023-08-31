@@ -1,8 +1,8 @@
-import { DataTypes, Model } from "sequelize";
-import util from "util";
-import connectToDB from "./db.js";
+import { DataTypes, Model } from 'sequelize';
+import util from 'util';
+import connectToDB from './db.js';
 
-export const db = await connectToDB("postgresql:///ratings");
+export const db = await connectToDB('postgresql:///ratings');
 
 export class User extends Model {
   [util.inspect.custom]() {
@@ -19,8 +19,8 @@ User.init(
     },
     email: {
       type: DataTypes.STRING,
-      unique: true,
       allowNull: false,
+      unique: true,
     },
     password: {
       type: DataTypes.STRING,
@@ -28,9 +28,9 @@ User.init(
     },
   },
   {
-    modelName: "user",
+    modelName: 'user',
     sequelize: db,
-  }
+  },
 );
 
 export class Movie extends Model {
@@ -61,9 +61,9 @@ Movie.init(
     },
   },
   {
-    modelName: "movie",
+    modelName: 'movie',
     sequelize: db,
-  }
+  },
 );
 
 export class Rating extends Model {
@@ -71,28 +71,33 @@ export class Rating extends Model {
     return this.toJSON();
   }
 }
-Rating.init(
 
+Rating.init(
   {
     ratingId: {
       type: DataTypes.INTEGER,
+      autoIncrement: true,
       primaryKey: true,
-      autoIncrement: true
     },
     score: {
-      type:DataTypes.INTEGER,
+      type: DataTypes.INTEGER,
+      allowNull: false,
     },
-  },{
-    sequelize:db,
+  },
+  {
+    modelName: 'rating',
+    sequelize: db,
     timestamps: true,
-    updatedAt: false
-  }
-)
+    updatedAt: false,
+  },
+);
 
-User.hasMany(Rating, {foreignKey: 'userId'})
-Rating.belongsTo(User, {foreignKey: 'userId'})
-Movie.hasMany(Rating, {foreignKey: 'movieId'})
-Rating.belongsTo(Movie, {foreignKey: 'movieId'})
+Movie.hasMany(Rating, { foreignKey: 'movieId' });
+Rating.belongsTo(Movie, { foreignKey: 'movieId' });
+
+User.hasMany(Rating, { foreignKey: 'userId' });
+Rating.belongsTo(User, { foreignKey: 'userId' });
+
 
 // const {User, db} = await import('./src/model.js');
 // db.sync({force: true})
