@@ -50,15 +50,9 @@ Movie.init(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    overview: {
-      type: DataTypes.TEXT,
-    },
-    releaseDate: {
-      type: DataTypes.DATE,
-    },
-    posterPath: {
-      type: DataTypes.STRING,
-    },
+    overview: DataTypes.TEXT,
+    releaseDate: DataTypes.DATE,
+    posterPath: DataTypes.STRING,
   },
   {
     modelName: 'movie',

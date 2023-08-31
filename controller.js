@@ -1,59 +1,42 @@
-import { Movie, User } from "./src/model.js";
+import { Movie, User, db } from "./src/model.js";
 
 const serverFunctions = {
   show: async (req, res) => {
-    const movies = await Movie.findAll();
-    console.log(await Movie.findAll());
-    res.json(movies);
+    res.send(await Movie.findAll());
   },
   getOne: async (req, res) => {
-    console.log(req.params);
-    const movie = await Movie.findByPk(req.params.id);
-    res.json(movie);
+    res.json(await Movie.findByPk(req.params.id));
   },
   login: async (req, res) => {
-    console.log(req.body);
-    const { email, password } = req.body;
-    const user = await User.findOne({ where: { email: email } });
-    if (user && user.password === password) {
-      req.session.userId = user.userId;
-      console.log(`${user.userId} is logged in`);
-      res.json({ success: true });
-    } else {
-      console.log(`Unable to authenticate ${user.userId}`);
+    const user = await User.findOne({ where: { email: req.body.email } });
+    if (!user || user.password != req.body.password) {
       res.json({ success: false });
+      return;
     }
+    req.session.userId = user.userId;
+    res.json(req.session);
   },
-  logout: (req, res) => {
+  logout: async (req, res) => {
     if (!req.session.userId) {
-      res.status(401).json({ error: "Unauthorized" });
-    } else {
-      req.session.destroy();
-      res.json({ success: true });
+      res.status(401).json({ error: `no user is logged in` });
+      return;
     }
+    const user = await User.findByPk(req.session.userId);
+    req.session.destroy();
+    res.status(200).json({ status: `User ${user.email} logged out` });
   },
-  // TODO: doesn't complete
   ratings: async (req, res) => {
     const { userId } = req.session;
-    const user = await User.findByPk(userId);
-    const ratings = await user.getRatings({
-      include: {
-        model: Movie,
-        attributes: ["title"],
-      },
-    });
+    const ratings = await User.findByPk(userId).then((user) =>
+      user.getRatings({ include: Movie })
+      // user.getRatings({ include: { model: Movie, attributes: ["title"] } })//, 
+    );// eager loaded with include
     res.json(ratings);
   },
-  // Returns an error
   addRating: async (req, res) => {
     const { userId } = req.session;
     const { movieId, score } = req.body;
-
-    const user = await User.findByPk(userId);
-    const rating = await user.createRating({
-      movieId: movieId,
-      score: score,
-    });
+    const rating = await User.findByPk(userId).then((user)=>user.createRating({ movieId: movieId, score: score }));
     res.json(rating);
   },
 };
