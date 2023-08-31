@@ -13,6 +13,8 @@ import IndexPage from "./pages/IndexPage.jsx";
 import AllMoviesPage from "./pages/AllMoviesPage.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import MovieDetailPage from "./pages/MovieDetailPage.jsx";
+import YourRatingsPage from './pages/YourRatingsPage.jsx';
+import LoginForm from '/src/components/LoginForm'
 import axios from "axios";
 
 const router = createBrowserRouter(
@@ -28,11 +30,19 @@ const router = createBrowserRouter(
           return { movies: res.data };
         }}
       />
-      <Route path="/login" element={<LoginPage />} />
+      <Route path="/login" element={<LoginPage />} 
+      />
       <Route path="/movies/:movieId" element={<MovieDetailPage />} 
         loader={async ({params})=>{
           const res=await axios.get(`/api/movies/${params.movieId}`);
           return {movies: res.data}
+        }}
+      />
+      <Route path="me" element={<YourRatingsPage/>}
+        loader = {async () => {
+          const res = await axios.get("/api/ratings");
+          console.log("loader", res.data)
+          return {ratings: res.data}
         }}
       />
     </Route>

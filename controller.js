@@ -14,22 +14,22 @@ const serverFunctions = {
       return;
     }
     req.session.userId = user.userId;
-    res.json(req.session);
+    res.json({ success: true });
   },
   logout: async (req, res) => {
     if (!req.session.userId) {
       res.status(401).json({ error: `no user is logged in` });
       return;
     }
-    const user = await User.findByPk(req.session.userId);
+    await User.findByPk(req.session.userId);
     req.session.destroy();
-    res.status(200).json({ status: `User ${user.email} logged out` });
+    res.json({success:true});
   },
   ratings: async (req, res) => {
     const { userId } = req.session;
     const ratings = await User.findByPk(userId).then((user) =>
-      user.getRatings({ include: Movie })
-      // user.getRatings({ include: { model: Movie, attributes: ["title"] } })//, 
+      // user.getRatings({ include: Movie })
+      user.getRatings({ include: { model: Movie, attributes: ["title"] } })
     );// eager loaded with include
     res.json(ratings);
   },
